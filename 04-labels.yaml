@@ -7,6 +7,6 @@ metadata:
     component: frontend
     environment: dev
 spec:
-  constiners:
+  containers:
   - name: nginx
     image: nginx
