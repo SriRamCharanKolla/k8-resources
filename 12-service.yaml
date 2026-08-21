@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service # types: ClusterIP, NodePort, LoadBalancer - Service is used to expose the pods to other pods and outside the cluster
+  # services are used for internal communications
+metadata:
+  name: nginx
+spec:
+  # ==========================================
+  # Service Type: (Default is ClusterIP)
+  # - ClusterIP: Internal communication within the cluster (Private IP).
+  # - NodePort: Exposes service on Node's IP at a static port (30000-32767).
+  # - LoadBalancer: Provisions a Cloud Provider Load Balancer (AWS ALB/NLB).
+  # - ExternalName: Maps service to an external DNS name (e.g. CNAME).
+  # ==========================================
+
+  # ==========================================
+  # Label Selector:
+  # Finds and routes traffic to all Pods matching these key-value labels.
+  # (Must match labels specified under pod metadata.labels)
+  # ==========================================
+  selector:
+    # labels are used as selectors
+    project: roboshop
+    component: frontend
+    env: dev
+
+  # ==========================================
+  # Port Configuration:
+  # - port: The port on which the Service itself listens inside the cluster (ClusterIP:port).
+  # - targetPort: The actual port on which the container application/pod is running (e.g. Nginx on 80).
+  # - protocol: TCP (default) or UDP.
+  # ==========================================
+  ports:
+  - protocol: TCP
+    port: 80         # Service Port (ClusterIP Port)
+    targetPort: 80   # Container / Pod Port
