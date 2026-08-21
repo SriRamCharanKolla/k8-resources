@@ -9,7 +9,7 @@ metadata:
   annotations:
     imageregistry: "https://hub.docker.com/"
     jenkinsURL: "https://jenkins.joindevops.com/build/job/roboshop/34"
-sepc:
+spec:
   containers:
     - name: nginx
       image: nginx
