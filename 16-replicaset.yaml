@@ -1,0 +1,58 @@
+# ==============================================================================
+# Definition:
+# A ReplicaSet's purpose is to maintain a stable set of replica Pods running at any 
+# given time. It is often used to guarantee the availability of a specified number 
+# of identical Pods (High Availability & Self-Healing).
+#
+# Use Cases:
+# 1. High Availability: Ensures specified number of Pod replicas (e.g., replicas: 3) are always alive.
+# 2. Self-Healing: If a Pod crashes, gets deleted, or its Node fails, ReplicaSet automatically launches a new Pod.
+# 3. Load Distribution: Scales identical Pods horizontally to handle user traffic evenly.
+# (Note: In modern Kubernetes, Deployments are preferred over raw ReplicaSets because 
+#  Deployments manage ReplicaSets and provide declarative rolling updates/rollbacks).
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx
+  # These labels belong to the ReplicaSet resource itself (used for RS identification/grouping)
+  labels:
+    project: roboshop
+    purpose: rs-demo
+    tier: frontend
+    component: frontend
+spec:
+  # Desired number of identical Pods to run at all times
+  replicas: 1
+
+  # ==============================================================================
+  # Selector (matchLabels):
+  # Defines how the ReplicaSet identifies which Pods it manages.
+  # (CRITICAL: matchLabels MUST match template.metadata.labels exactly)
+  # ==============================================================================
+  selector:
+    # using these labels replica set selects the pod
+    matchLabels:
+      project: roboshop
+      purpose: rs-demo
+      tier: frontend
+      component: frontend
+
+  # ==============================================================================
+  # Pod Template:
+  # Blueprint for creating new Pods. Whenever the ReplicaSet needs to create a Pod,
+  # it uses this template. (Pod definition is a subset of ReplicaSet).
+  # ==============================================================================
+  template:
+    metadata:
+      # Labels applied to each Pod created from this template
+      labels:
+        project: roboshop
+        purpose: rs-demo
+        tier: frontend
+        component: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:stable-alpine3.23-perl

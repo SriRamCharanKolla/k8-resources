@@ -20,6 +20,10 @@ This repository contains Kubernetes manifest files and practical command referen
 | [10-secretes.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/10-secretes.yaml) | `Secret` | Base64-encoded confidential credentials storage |
 | [11-pod-secretes.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/11-pod-secretes.yaml) | `Pod` | Injecting Kubernetes Secrets as container environment variables (`secretRef`) |
 | [12-service.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/12-service.yaml) | `Service` | Internal L4 networking and load balancing (`ClusterIP`) using label selectors |
+| [13-service-test.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/13-service-test.yaml) | `Pod` | Client test Pod (AlmaLinux) used to test internal cluster DNS & curl services |
+| [14-service-np.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/14-service-np.yaml) | `Service` | Exposing service externally via Worker Node IP on a static port (`NodePort`) |
+| [15-svc-lb.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/15-svc-lb.yaml) | `Service` | Exposing service via Cloud Provider Load Balancer (`LoadBalancer`) |
+| [16-replicaset.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/16-replicaset.yaml) | `ReplicaSet` | Ensuring high availability, scaling, and self-healing of identical Pod replicas |
 
 ---
 
@@ -140,26 +144,44 @@ kubectl exec -it pod-secretes-demo -- env | grep -E "username|password"
 
 ---
 
-### 9. Services & Networking (`12-service.yaml`)
+### 9. Services & Networking (`12-service.yaml`, `14-service-np.yaml`, `15-svc-lb.yaml`)
 
-#### Core Networking Concepts
-* **Service:** Provides a stable, persistent Virtual IP (`ClusterIP`) and DNS name for ephemeral Pods selected via `labels`.
-* **Port Mapping:**
-  * `port: 80` $\rightarrow$ The port exposed by the Service internally within the cluster.
-  * `targetPort: 80` $\rightarrow$ The actual port on which the container application is listening.
-* **Service Types:**
-  1. **`ClusterIP` (Default):** Accessible **only inside** the cluster (for microservice-to-microservice communication like Frontend to Backend).
-  2. **`NodePort`:** Exposes the service on a static high port (`30000-32767`) on each Worker Node's IP (`External IP:NodePort`).
-  3. **`LoadBalancer`:** Automatically provisions a Cloud Provider Load Balancer (e.g., AWS Classic/NLB) with a public external endpoint.
+#### Port Mapping Architecture:
+* `targetPort: 80` $\rightarrow$ Port running on the Container/Pod.
+* `port: 80` $\rightarrow$ Port exposed on the Service (ClusterIP).
+* `nodePort: 32141` $\rightarrow$ Port exposed on the Worker Node's Public IP (`30000-32767`).
 
 ```bash
-# Apply Service
+# Apply ClusterIP Service (Internal only)
 kubectl apply -f 12-service.yaml
 
-# Check Service details and assigned ClusterIP / Endpoints
+# Apply NodePort Service (Accessible via NodeIP:32141)
+kubectl apply -f 14-service-np.yaml
+
+# Apply LoadBalancer Service (Provisions AWS ELB)
+kubectl apply -f 15-svc-lb.yaml
+
+# Check Services & Endpoints
 kubectl get svc
 kubectl get endpoints nginx
-kubectl describe svc nginx
+```
+
+---
+
+### 10. ReplicaSets (`16-replicaset.yaml`)
+```bash
+# Apply ReplicaSet
+kubectl apply -f 16-replicaset.yaml
+
+# Check ReplicaSet status
+kubectl get rs
+
+# Scale Replicas imperatively (Test scaling from 1 to 3)
+kubectl scale rs nginx --replicas=3
+
+# Test Self-Healing (Delete one pod, RS automatically creates a new one!)
+kubectl delete pod <pod-name-generated-by-rs>
+kubectl get pods
 ```
 
 ---

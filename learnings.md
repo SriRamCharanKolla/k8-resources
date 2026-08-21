@@ -14,8 +14,9 @@
 7. [Configuration Decoupling: Env, ConfigMaps & Secrets](#-7-configuration-decoupling-env-configmaps--secrets)
 8. [Kubernetes Services & Networking (ClusterIP vs NodePort vs LoadBalancer)](#-8-kubernetes-services--networking)
 9. [End-to-End Client-to-Service Communication Flow](#-9-end-to-end-client-to-service-communication-flow)
-10. [Top Real-World Debugging Errors & Solutions](#-10-top-real-world-debugging-errors--solutions)
-11. [Must-Know Kubernetes Interview Q&A](#-11-must-know-kubernetes-interview-qa)
+10. [ReplicaSets (Self-Healing, Scaling & HA)](#-10-replicasets-self-healing-scaling--ha)
+11. [Top Real-World Debugging Errors & Solutions](#-11-top-real-world-debugging-errors--solutions)
+12. [Must-Know Kubernetes Interview Q&A](#-12-must-know-kubernetes-interview-qa)
 
 ---
 
@@ -199,7 +200,29 @@ resources:
 
 ---
 
-## 📌 10. Top Real-World Debugging Errors & Solutions
+## 📌 10. ReplicaSets (Self-Healing, Scaling & HA)
+
+* **ReplicaSet ([16-replicaset.yaml](file:///Users/sriramcharankolla/Desktop/DevOps/k8-resources/16-replicaset.yaml)):** ఎల్లప్పుడూ మనం కోరుకున్న సంఖ్యలో ఒకే విధమైన (Identical) Pods రన్ అయ్యేలా చూస్తుంది.
+
+### 🔹 3 ప్రధాన ప్రయోజనాలు (Core Capabilities):
+1. **High Availability (HA):** ఒకటి కంటే ఎక్కువ Pods రన్ అవ్వడం వల్ల ఒక Pod ఫెయిల్ అయినా అప్లికేషన్ ఆగదు.
+2. **Self-Healing (స్వీయ స్వస్థత):** ఏదైనా కారణం వల్ల ఒక Pod క్రాష్ అయినా లేదా డిలీట్ అయినా, ReplicaSet వెంటనే కొత్త Pod ని ఆటోమేటిక్‌గా లాంచ్ చేస్తుంది.
+3. **Scaling:** ట్రాఫిక్ పెరిగినప్పుడు `replicas` కౌంట్‌ను పెంచి లోడ్‌ను సమానంగా పంచుకోవచ్చు:
+   ```bash
+   kubectl scale rs nginx --replicas=5
+   ```
+
+### 🔹 ReplicaSet లో ముఖ్యమైన భాగాలు:
+* `replicas: 1` $\rightarrow$ ఎన్ని Pods ఎప్పుడూ రన్ అవ్వాలో నిర్ణయిస్తుంది.
+* `selector.matchLabels` $\rightarrow$ ReplicaSet ఏ Pods ని తన కంట్రోల్ లో ఉంచుకోవాలో చెబుతుంది (ఇది `template.metadata.labels` తో ఖచ్చితంగా మ్యాచ్ అవ్వాలి).
+* `template` $\rightarrow$ కొత్త Pods క్రియేట్ చేయడానికి ఉపయోగించే బ్లూప్రింట్ (Pod Definition).
+
+### 🔹 ఇంటర్వ్యూ ప్రశ్న: ReplicaSet vs Deployment తేడా ఏమిటి?
+> **Answer:** ReplicaSet కేవలం Pod సంఖ్యను (Replicas) స్థిరంగా ఉంచుతుంది, కానీ అప్లికేషన్ వెర్షన్ మారినప్పుడు **Rolling Updates మరియు Zero-Downtime Rollbacks** చేయలేదు. **Deployment** అనేది ReplicaSet పైన ఉండే ఒక హైయర్-లెవెల్ కంట్రోలర్; ఇది ఆటోమేటిక్‌గా పాత ReplicaSet నుండి కొత్త ReplicaSet కి ట్రాఫిక్‌ను డ్రాప్ అవ్వకుండా మార్చగలదు. కాబట్టి ప్రొడక్షన్‌లో ఎప్పుడూ **Deployments** మాత్రమే వాడతారు.
+
+---
+
+## 📌 11. Top Real-World Debugging Errors & Solutions
 
 | ఎర్రర్ మెసేజ్ | కారణం (Root Cause) | పరిష్కారం (Fix) |
 | :--- | :--- | :--- |
@@ -207,10 +230,11 @@ resources:
 | `curl: (7) Connection refused` | `selector` మరియు `labels` స్పెల్లింగ్ మ్యాచ్ అవ్వలేదు (No endpoints) | `env: dev` మరియు `environment: dev` సరిగ్గా మ్యాచ్ చేయాలి |
 | `unknown field "sepc"` / `"secreteRef"` | YAML లో స్పెల్లింగ్ మిస్టేక్ (Typo) | `spec`, `secretRef` గా మార్చాలి |
 | `unknown field "limits"` | Indentation లోపం | `requests` మరియు `limits` లను `resources:` కింద స్పేస్‌లతో రాయాలి |
+| `unknown field "spec.selector.template"` | `template` ని `selector` లోపల రాయడం | `template` ని `selector` తో సమానమైన లెవెల్‌లో రాయాలి |
 
 ---
 
-## 📌 11. Must-Know Kubernetes Interview Q&A
+## 📌 12. Must-Know Kubernetes Interview Q&A
 
 ### Q1: Pod మరియు Container మధ్య తేడా ఏమిటి?
 > **Answer:** Container అనేది కేవలం ఒక సింగిల్ ప్రాసెస్/యాప్ రన్ అయ్యే ఐసోలేటెడ్ ఎన్విరాన్‌మెంట్. Pod అనేది Kubernetes యొక్క అతి చిన్న మేనేజ్‌మెంట్ యూనిట్. ఒక Pod లోపల ఒకటి లేదా అంతకంటే ఎక్కువ కంటైనర్లు (Sidecar containers) ఒకే IP మరియు స్టోరేజ్‌ను పంచుకుంటూ కలిసి రన్ అవుతాయి.
@@ -223,3 +247,6 @@ resources:
 
 ### Q4: NodePort పరిధి (Port Range) ఎంత?
 > **Answer:** డిఫాల్ట్‌గా `30000` నుండి `32767` వరకు.
+
+### Q5: ReplicaSet ఉన్నప్పుడు మాన్యువల్‌గా ఒక Pod ని డిలీట్ చేస్తే ఏం జరుగుతుంది?
+> **Answer:** ReplicaSet Desired State (`replicas: N`) ని నిరంతరం గమనిస్తూ ఉంటుంది. మనం ఒక Pod ని డిలీట్ చేయగానే, ప్రస్తుత Pods సంఖ్య తగ్గడం చూసి వెంటనే క్షణాల్లో మరొక కొత్త Pod ని లాంచ్ చేసి బ్యాలెన్స్ చేస్తుంది (Self-Healing).
