@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-np
+spec:
+  type: NodePort # NodePort is used to expose the service to the outside of the cluster
+  selector: # Selector is used to select the pods - it is used to select the pods that have the same labels as the selector
+    project: roboshop
+    component: frontend
+    environment: dev
+  ports:
+    - protocol: TCP
+      port: 80           # Service Port - it is used to access the service inside the cluster
+      targetPort: 80     # Container Port - it is used to access the container
+      nodePort: 32141    # Node Port - it is used to access the service outside the cluster - its optional
