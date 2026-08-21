@@ -21,7 +21,7 @@ spec:
     # labels are used as selectors
     project: roboshop
     component: frontend
-    env: dev
+    environment: dev
 
   # ==========================================
   # Port Configuration:
