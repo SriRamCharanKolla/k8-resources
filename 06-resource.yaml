@@ -7,12 +7,12 @@ spec:
   - name: nginx
     image: nginx
     resources:
-    # soft limit(minimum limits)
-    requests:
-      cpu: 100m # 1/10th of a core - 100m means 100 millicores (1/10th of a core) 1 core = 1000m
-      memory: 128Mi # 128 MB RAM - Mi means Mebibytes (1 Mi = 1024 Ki, 1 Gi = 1024 Mi, 1 Ti = 1024 Gi)
-    # hard limit(maximum limits)
-    limits:
-      cpu: 200m # 2/10th of a core - 200m means 200 millicores (2/10th of a core) 1 core = 1000m
-      memory: 256Mi # 256 MB RAM - Mi means Mebibytes (1 Mi = 1024 Ki, 1 Gi = 1024 Mi, 1 Ti = 1024 Gi)
+      # soft limit(minimum limits)
+      requests:
+        cpu: 100m # 1/10th of a core - 100m means 100 millicores (1/10th of a core) 1 core = 1000m
+        memory: 128Mi # 128 MB RAM - Mi means Mebibytes (1 Mi = 1024 Ki, 1 Gi = 1024 Mi, 1 Ti = 1024 Gi)
+      # hard limit(maximum limits)
+      limits:
+        cpu: 200m # 2/10th of a core - 200m means 200 millicores (2/10th of a core) 1 core = 1000m
+        memory: 256Mi # 256 MB RAM - Mi means Mebibytes (1 Mi = 1024 Ki, 1 Gi = 1024 Mi, 1 Ti = 1024 Gi)
     
