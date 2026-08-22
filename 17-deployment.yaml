@@ -1,0 +1,62 @@
+# ==============================================================================
+# Definition:
+# A Deployment provides declarative updates for Pods and ReplicaSets. 
+# You describe a desired state in a Deployment, and the Deployment Controller 
+# changes the actual state to the desired state at a controlled rate. 
+# Deployments manage the creation, updating, scaling, and rolling back of ReplicaSets.
+#
+# Use Cases:
+# 1. Rolling Updates & Zero Downtime: Seamlessly deploy new versions of an application 
+#    by gradually replacing old Pods with new ones.
+# 2. Rollback to Previous Revisions: Easily roll back to a stable older version if a 
+#    new deployment is unstable or failing (e.g., `kubectl rollout undo deployment/<name>`).
+# 3. Scaling & Self-Healing: Scale replicas up or down horizontally to meet load demands 
+#    and automatically replace crashed/unhealthy Pods via underlying ReplicaSets.
+# 4. Pausing & Resuming: Pause rollout to apply multiple changes/fixes and resume when ready.
+# 5. Declarative Workload Management: The standard, recommended controller for stateless 
+#    production applications in Kubernetes.
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  # Labels belonging to the Deployment object itself (used for identification, grouping, & filtering)
+  labels:
+    project: roboshop
+    purpose: deployment-demo
+    tier: frontend
+    component: frontend
+spec:
+  # Desired number of identical Pods to run at all times
+  replicas: 1
+
+  # ==============================================================================
+  # Selector (matchLabels):
+  # Defines how the Deployment identifies which Pods (and ReplicaSets) it manages.
+  # (CRITICAL: matchLabels MUST match template.metadata.labels exactly)
+  # ==============================================================================
+  selector:
+    matchLabels:
+      project: roboshop
+      purpose: deployment-demo
+      tier: frontend
+      component: frontend
+
+  # ==============================================================================
+  # Pod Template:
+  # Blueprint for creating new Pods managed by the Deployment's ReplicaSets.
+  # Whenever a Pod needs to be created or updated, this template is used.
+  # ==============================================================================
+  template:
+    metadata:
+      # Labels applied to each Pod created from this template
+      labels:
+        project: roboshop
+        purpose: deployment-demo
+        tier: frontend
+        component: frontend
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:stable-alpine3.23-perl

@@ -12,4 +12,4 @@ spec:
     - protocol: TCP
       port: 80           # Service Port - it is used to access the service inside the cluster
       targetPort: 80     # Container Port - it is used to access the container
-      nodePort: 32141    # Node Port - it is used to access the service outside the cluster - its optional
+      nodePort: 32141    # Node Port - it is used to access the service outside the cluster - its optional. This node port setup fixed port number to access service from outside the cluster. If we remove this nodePort from the yaml file, the service will be accessed using a random port number.
